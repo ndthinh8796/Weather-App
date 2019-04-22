@@ -28,20 +28,29 @@ export default class App extends React.Component {
   }
 
   getCurrentWeather(countryId) {
+    // Get current weather from calling api
+    // @countryId: Id of the country user selected
     return fetch(
       'https://api.openweathermap.org/data/2.5/weather?id=' +
         countryId +
         '&appid=94445aaf723b5e25a0c02a9160eac8e2&units=metric'
     )
       .then(response => {
+        // Get reponse in json
         return response.json();
       })
       .then(currentWeather => {
+        // @icon: selected city current icon
+        // @description: selected city current description
+        // @temperature: selected city current temperature
+        // @pressure: selected city current pressure
+        // @humidity: selected city current humidity
         var icon = currentWeather.weather[0].icon;
         var description = currentWeather.weather[0].description;
         var temperature = currentWeather.main.temp;
         var pressure = currentWeather.main.pressure;
         var humidity = currentWeather.main.humidity;
+        // Show weather to the screen
         this.showWeather(icon, description, temperature, pressure, humidity);
       })
       .catch(error => {
@@ -50,6 +59,7 @@ export default class App extends React.Component {
   }
 
   showWeather(icon, description, temperature, pressure, humidity) {
+    // Show weather of the selected city to screen
     this.setState({
       weatherInfo: (
         <View style={styles.weatherInfo}>
@@ -86,11 +96,13 @@ export default class App extends React.Component {
 
         <Text style={styles.titleBlack}>Weather Statistics</Text>
 
+        // Facebook login button
         <LoginButton />
 
         <TextInput
           style={styles.cityInput}
           onChangeText={text => {
+            // find the city that include text
             var matchedCities = cityList.filter(item =>
               item.name
                 .normalize('NFD')
@@ -99,6 +111,7 @@ export default class App extends React.Component {
                 .replace(/[đð]/g, 'd')
                 .includes(text.toLowerCase())
             );
+            // Set the state of text, cityNamePicker, city
             this.setState({
               text,
               cityNamePicker: matchedCities.map(item => (
@@ -108,6 +121,7 @@ export default class App extends React.Component {
                 ? ''
                 : matchedCities[0].name,
             });
+            // Call api to show weather
             setTimeout(() => {
               if (this.state.city) {
                 var countryId = cityList.filter(
@@ -120,7 +134,7 @@ export default class App extends React.Component {
           placeholder="Enter Your City Here"
           value={this.state.text}
         />
-
+        // Picker for user to select city
         <Picker
           selectedValue={this.state.city}
           style={styles.picker}
@@ -136,7 +150,7 @@ export default class App extends React.Component {
           <Picker.Item label="" value="" />
           {this.state.cityNamePicker}
         </Picker>
-
+        // Show current weather of selected city
         {this.state.weatherInfo}
       </View>
     );
@@ -157,6 +171,7 @@ class LoginButton extends React.Component {
   }
 
   logOut() {
+    // Logout of facebook
     var access_token = this.state.token;
     fetch('https://graph.facebook.com/' + access_token + '/permissions', {
       method: 'DELETE',
@@ -173,6 +188,7 @@ class LoginButton extends React.Component {
   }
 
   async logIn() {
+    // Login to facebook
     try {
       const {
         type,
