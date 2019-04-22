@@ -177,7 +177,6 @@ class LoginButton extends React.Component {
 
   async logIn() {
   try {
-    console.log('check');
     const {
       type,
       token,
@@ -211,10 +210,8 @@ class LoginButton extends React.Component {
         style={styles.loginButton}
         onPress={() => {
           if (this.state.token) {
-            console.log('logging out');
             this.logOut();
           } else {
-            console.log('logging in');
             this.logIn();
           } 
         }}>
