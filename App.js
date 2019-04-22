@@ -8,7 +8,7 @@ import {
   TextInput,
   Image,
   TouchableOpacity,
-  Alert
+  Alert,
 } from 'react-native';
 import { Facebook } from 'expo';
 
@@ -20,13 +20,12 @@ export default class App extends React.Component {
     this.state = {
       city: '',
       text: '',
-      cityNamePicker: cityList.map(item =>
+      cityNamePicker: cityList.map(item => (
         <Picker.Item label={item.name} value={item.name} />
-      ),
+      )),
       weatherInfo: undefined,
     };
   }
-
 
   getCurrentWeather(countryId) {
     return fetch(
@@ -97,6 +96,7 @@ export default class App extends React.Component {
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase()
+                .replace(/[đð]/g, 'd')
                 .includes(text.toLowerCase())
             );
             this.setState({
@@ -128,9 +128,8 @@ export default class App extends React.Component {
           onValueChange={(itemValue, itemIndex) => {
             this.setState({ city: itemValue });
             if (itemValue) {
-              var countryId = cityList.filter(
-                item => item.name == itemValue
-              )[0].id;
+              var countryId = cityList.filter(item => item.name == itemValue)[0]
+                .id;
               this.getCurrentWeather(countryId);
             }
           }}>
@@ -150,59 +149,59 @@ class LoginButton extends React.Component {
     this.state = {
       loginStatus: 'Login With Facebook',
       userPicture: {
-            uri:
-              'https://wwctfm.com/wp-content/uploads/2017/07/facebook-logo-f-sqaure1.png',
-          },
-      token : undefined,
+        uri:
+          'https://wwctfm.com/wp-content/uploads/2017/07/facebook-logo-f-sqaure1.png',
+      },
+      token: undefined,
     };
   }
 
   logOut() {
-    var access_token=this.state.token;
-    fetch(
-    "https://graph.facebook.com/" + access_token + "/permissions",{
-    method : "DELETE",
+    var access_token = this.state.token;
+    fetch('https://graph.facebook.com/' + access_token + '/permissions', {
+      method: 'DELETE',
     }).then(response => {
       this.setState({
         loginStatus: 'Login With Facebook',
         token: undefined,
         userPicture: {
-            uri:
-              'https://wwctfm.com/wp-content/uploads/2017/07/facebook-logo-f-sqaure1.png',
-          }
+          uri:
+            'https://wwctfm.com/wp-content/uploads/2017/07/facebook-logo-f-sqaure1.png',
+        },
       });
-    })
-}
-  
+    });
+  }
 
   async logIn() {
-  try {
-    const {
-      type,
-      token,
-      expires,
-      permissions,
-      declinedPermissions,
-    } = await Facebook.logInWithReadPermissionsAsync('841840166175328', {
-      permissions: ['public_profile'],
-    });
-    
-    if (type === 'success') {
-      // Get the user's name using Facebook's Graph API
-      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=name,picture`);
-      var fbresponse = await response.json();
-      this.setState({
-        userPicture: {uri: fbresponse.picture.data.url},
-        loginStatus: fbresponse.name,
-        token
+    try {
+      const {
+        type,
+        token,
+        expires,
+        permissions,
+        declinedPermissions,
+      } = await Facebook.logInWithReadPermissionsAsync('841840166175328', {
+        permissions: ['public_profile'],
+      });
+
+      if (type === 'success') {
+        // Get the user's name using Facebook's Graph API
+        const response = await fetch(
+          `https://graph.facebook.com/me?access_token=${token}&fields=name,picture`
+        );
+        var fbresponse = await response.json();
+        this.setState({
+          userPicture: { uri: fbresponse.picture.data.url },
+          loginStatus: fbresponse.name,
+          token,
         });
-    } else {
-      // type === 'cancel'
+      } else {
+        // type === 'cancel'
+      }
+    } catch ({ message }) {
+      alert(`Facebook Login Error: ${message}`);
     }
-  } catch ({ message }) {
-    alert(`Facebook Login Error: ${message}`);
   }
-}
 
   render() {
     return (
@@ -213,7 +212,7 @@ class LoginButton extends React.Component {
             this.logOut();
           } else {
             this.logIn();
-          } 
+          }
         }}>
         <Image
           style={styles.loginButtonImage}
@@ -257,7 +256,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     flexDirection: 'row',
     backgroundColor: '#3d5a98',
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
   loginButtonImage: {
     width: 35,
@@ -294,7 +293,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 3, height: 5 },
     shadowOpacity: 0.5,
-    shadowRadius: 1,  
+    shadowRadius: 1,
   },
   weatherIconImage: {
     width: 75,
