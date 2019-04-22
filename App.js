@@ -93,12 +93,9 @@ export default class App extends React.Component {
         <SafeAreaView style={styles.header}>
           <Text style={styles.title}>Weather App</Text>
         </SafeAreaView>
-
         <Text style={styles.titleBlack}>Weather Statistics</Text>
-
         // Facebook login button
         <LoginButton />
-
         <TextInput
           style={styles.cityInput}
           onChangeText={text => {
