@@ -8,6 +8,7 @@ import {
   TextInput,
   Image,
   TouchableOpacity,
+  Alert
 } from 'react-native';
 import { Facebook } from 'expo';
 
@@ -126,14 +127,12 @@ export default class App extends React.Component {
           itemStyle={{ height: 145 }}
           onValueChange={(itemValue, itemIndex) => {
             this.setState({ city: itemValue });
-            setTimeout(() => {
-              if (this.state.city) {
-                var countryId = cityList.filter(
-                  item => item.name == this.state.city
-                )[0].id;
-                this.getCurrentWeather(countryId);
-              }
-            }, 1000);
+            if (itemValue) {
+              var countryId = cityList.filter(
+                item => item.name == itemValue
+              )[0].id;
+              this.getCurrentWeather(countryId);
+            }
           }}>
           <Picker.Item label="" value="" />
           {this.state.cityNamePicker}
@@ -150,44 +149,78 @@ class LoginButton extends React.Component {
     super(props);
     this.state = {
       loginStatus: 'Login With Facebook',
+      userPicture: {
+            uri:
+              'https://wwctfm.com/wp-content/uploads/2017/07/facebook-logo-f-sqaure1.png',
+          },
+      token : undefined,
     };
   }
 
-
-    async function logIn() {
-    try {
-      const {
-        type,
-        token,
-        expires,
-        permissions,
-        declinedPermissions,
-      } = await Facebook.logInWithReadPermissionsAsync('841840166175328', {
-        permissions: ['public_profile'],
+  logOut() {
+    var access_token=this.state.token;
+    fetch(
+    "https://graph.facebook.com/" + access_token + "/permissions",{
+    method : "DELETE",
+    }).then(response => {
+      this.setState({
+        loginStatus: 'Login With Facebook',
+        token: undefined,
+        userPicture: {
+            uri:
+              'https://wwctfm.com/wp-content/uploads/2017/07/facebook-logo-f-sqaure1.png',
+          }
       });
-      if (type === 'success') {
-        // Get the user's name using Facebook's Graph API
-        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
-        Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
-      } else {
-        // type === 'cancel'
-      }
-    } catch ({ message }) {
-      alert(`Facebook Login Error: ${message}`);
+    })
+}
+  
+
+  async logIn() {
+  try {
+    console.log('check');
+    const {
+      type,
+      token,
+      expires,
+      permissions,
+      declinedPermissions,
+    } = await Facebook.logInWithReadPermissionsAsync('841840166175328', {
+      permissions: ['public_profile'],
+    });
+    
+    if (type === 'success') {
+      // Get the user's name using Facebook's Graph API
+      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=name,picture`);
+      var fbresponse = await response.json();
+      this.setState({
+        userPicture: {uri: fbresponse.picture.data.url},
+        loginStatus: fbresponse.name,
+        token
+        });
+    } else {
+      // type === 'cancel'
     }
+  } catch ({ message }) {
+    alert(`Facebook Login Error: ${message}`);
   }
+}
 
   render() {
     return (
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={this.logIn.bind(this)}>
+        onPress={() => {
+          if (this.state.token) {
+            console.log('logging out');
+            this.logOut();
+          } else {
+            console.log('logging in');
+            this.logIn();
+          } 
+        }}>
         <Image
           style={styles.loginButtonImage}
-          source={{
-            uri:
-              'https://wwctfm.com/wp-content/uploads/2017/07/facebook-logo-f-sqaure1.png',
-          }}
+          source={this.state.userPicture}
         />
         <View style={styles.statusLog}>
           <Text style={styles.loginButtonText}>{this.state.loginStatus}</Text>
@@ -227,6 +260,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     flexDirection: 'row',
     backgroundColor: '#3d5a98',
+    overflow: 'hidden'
   },
   loginButtonImage: {
     width: 35,
@@ -259,23 +293,23 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 0.5,
-    borderColor: 'gray',
-    backgroundColor: '#c9e3ff',
+    backgroundColor: '#fdfdfd',
+    shadowColor: '#000',
+    shadowOffset: { width: 3, height: 5 },
+    shadowOpacity: 0.5,
+    shadowRadius: 1,  
   },
   weatherIconImage: {
     width: 75,
     height: 75,
-    backgroundColor: '#c9e3ff',
+    backgroundColor: '#fdfdfd',
     paddingTop: 50,
   },
   weatherDescription: {
     textTransform: 'capitalize',
-    backgroundColor: '#fce0ff',
+    backgroundColor: '#fdfdfd',
     lineHeight: 24,
     paddingRight: 20,
     paddingLeft: 5,
-    borderWidth: 0.5,
-    borderColor: 'gray',
   },
 });
